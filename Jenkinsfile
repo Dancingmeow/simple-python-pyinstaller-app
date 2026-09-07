@@ -2,16 +2,25 @@ pipeline {
     agent any
     options {
         skipStagesAfterUnstable()
+        timestamp()
     }
     stages {
+        stage('Setup') {
+            steps {
+                powershell '''
+                    uv --version
+                    uv sync --locked
+                '''
+            }
+        }
         stage('Build') {
             steps {
-                sh 'python3 -m py_compile sources/add2vals.py sources/calc.py'
+                powershell 'uv run --locked python -m py_compile sources/add2vals.py sources/calc.py'
             }
         }
         stage('Test') {
             steps {
-                sh 'py.test --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
+                powershell 'uv run --locked python -m pytest --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
             }
             post {
                 always {
@@ -21,7 +30,7 @@ pipeline {
         }
         stage('Deliver') {
             steps {
-                sh 'pyinstaller --onefile sources/add2vals.py'
+                powershell 'uv run --locked python -m pyinstaller --onefile sources/add2vals.py'
             }
             post {
                 success {
