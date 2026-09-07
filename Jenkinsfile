@@ -2,7 +2,7 @@ pipeline {
     agent any
     options {
         skipStagesAfterUnstable()
-        timestamp()
+        timestamps()
     }
     stages {
         stage('Setup') {
